@@ -1,36 +1,50 @@
 const { response, request } = require('express');
+const bcryptjs = require('bcryptjs');
+const Usuario = require('../models/usuario');
 
-const usuariosGet = (req = request, res = response) => {
-    const { q, nombre = 'No name', apikey, page = '1', limit } = req.query;
-    
+const usuariosGet = async (req = request, res = response) => {
+    const { limite = 5, min = 0} = req.query;
+
+    const usuarios = await Usuario.find()
+        .skip(Number(min))
+        .limit(Number(limite));
+
     res.json({
-        msg: 'get API - controlador',
-        q,
-        nombre, 
-        apikey,
-        page,
-        limit
+        usuarios
     });
 };
 
 
-const usuariosPut = (req, res = response) => {
+const usuariosPut = async (req, res = response) => {
     const id = req.params.id;
-    
-    res.json({
-        msg: 'put API - controlador',
-        id
-    });
+    const { _id, password, google, correo, ...resto } = req.body;
+
+    // TODO: validar contra base de datos
+    if (password) {
+        // Encriptar la contraseña
+        const salt = bcryptjs.genSaltSync();
+        resto.password = bcryptjs.hashSync(password, salt);
+    }
+
+    const usuario = await Usuario.findByIdAndUpdate(id, resto);
+
+    res.json(usuario);
 };
 
 
-const usuariosPost = (req, res = response) => {
-    const { nombre, edad } = req.body;
-    
+const usuariosPost = async (req = request, res = response) => {
+    const { name, email, password, role } = req.body;
+    const usuario = new Usuario({ name, email, password, role });
+
+    // Encriptar la contraseña
+    const salt = bcryptjs.genSaltSync();
+    usuario.password = bcryptjs.hashSync(password, salt);
+
+    // Guardar en DB
+    await usuario.save();
+
     res.json({
-        msg: 'post API - controlador',
-        nombre,
-        edad
+        usuario
     });
 };
 
