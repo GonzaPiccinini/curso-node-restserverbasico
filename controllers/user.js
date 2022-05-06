@@ -71,15 +71,7 @@ const usuariosDelete = async (req, res = response) => {
     const usuario = await Usuario.findByIdAndUpdate(id, queryFilter)
 
     res.json({
-        id,
-        usuario
-    });
-};
-
-
-const usuariosPatch = (req, res = response) => {
-    res.json({
-        msg: 'patch API - controlador'
+        usuario,
     });
 };
 
@@ -87,6 +79,5 @@ module.exports = {
     usuariosGet,
     usuariosPut,
     usuariosPost,
-    usuariosDelete,
-    usuariosPatch
+    usuariosDelete
 }
